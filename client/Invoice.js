@@ -1,4 +1,5 @@
 var React = require('react');
+var request = require('superagent');
 
 var LineItem = React.createClass({
   render: function() {
@@ -17,7 +18,7 @@ var LineItem = React.createClass({
 module.exports = React.createClass({
   handleClick: function(e) {
     var invoice = this.props.model;
-    var description = "Invoice #" + invoice.invoiceId;
+    var description = 'Invoice #' + invoice.invoiceId;
 
     this._stripeCheckout.open({
       name: 'FISHER IO',
@@ -29,6 +30,15 @@ module.exports = React.createClass({
 
   handleStripeToken: function(token) {
     console.log('token', token);
+
+    var id = this.props.model.invoiceId;
+    request
+      .post('/api/invoice/' + id + '/payment')
+      .end(function(err, res){
+          if (err) return console.error(err);
+
+          console.log('response form payment: ', res);
+      });
   },
 
   render: function() {
@@ -42,6 +52,8 @@ module.exports = React.createClass({
 
     });
      
+window.handleStripeToken = this.handleStripeToken;
+
     var invoice = this.props.model;
     var invoiceId = invoice.invoiceId;
     var lineItemModels = invoice.lineItems;
